@@ -4,4 +4,29 @@
 
 .image-manager-input{}
 .image-manager-input .image-wrapper{ margin-top: 10px; border: 1px solid #ddd; border-radius: 4px; display: inline-block; padding: 4px; background: #FFF; }
+.image-manager-input .image-wrapper.image-wrapper__multiple{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    background: transparent;
+}
+.image-manager-input .image-wrapper.image-wrapper__multiple .image-manager__multiple-item {
+    margin-right: 10px;
+    position: relative;
+}
+.image-manager-input .image-wrapper.image-wrapper__multiple .image-manager__multiple-item button {
+    position: absolute;
+    right: 0;
+    top: 0;
+    border: none;
+    font-size: 20px;
+    padding: 5px;
+    width: 38px;
+    height: 38px;
+    text-align: center;
+    background: #fff;
+    font-weight: bold;
+}
 .image-manager-input .image-wrapper .img-preview{ background: #dadada; max-width: 200px; max-height: 200px; height: auto; line-height: 1.42857; }
+
+.image-manager-input .image-manager__multiple-item {}

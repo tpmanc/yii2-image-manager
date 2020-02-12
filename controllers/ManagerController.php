@@ -64,6 +64,7 @@ class ManagerController extends Controller {
 		$cropAspectRatio = Yii::$app->request->get("aspect-ratio");
 		$cropViewMode = Yii::$app->request->get("crop-view-mode", 1);
 		$defaultImageId = Yii::$app->request->get("image-id");
+		$multiple = Yii::$app->request->get("multiple", false);
 
 		//set blank layout if viewMode = iframe
 		if ($viewMode == "iframe") {
@@ -90,6 +91,7 @@ class ManagerController extends Controller {
 		$this->view->registerJs("imageManagerModule.cropRatio = '" . $cropAspectRatio . "';", 3);
 		$this->view->registerJs("imageManagerModule.cropViewMode = '" . $cropViewMode . "';", 3);
 		$this->view->registerJs("imageManagerModule.selectType = '" . $selectType . "';", 3);
+		$this->view->registerJs('imageManagerModule.multiple = ' . (($multiple == 'true') ? 'true' : 'false') . ';', 3);
 		$this->view->registerJs("imageManagerModule.message = " . Json::encode([
 					'deleteMessage' => Yii::t('imagemanager', 'Are you sure you want to delete this image?'),
 				]) . ";", 3);

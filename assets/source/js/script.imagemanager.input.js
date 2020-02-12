@@ -2,6 +2,7 @@ var imageManagerInput = {
 	baseUrl: null,
 	//language
 	message: null,
+	multiple: false,
 	//init imageManagerInput
 	init: function(){
 		//create modal
@@ -30,7 +31,10 @@ var imageManagerInput = {
 		}
 	},
 	//open media manager modal
-	openModal: function(inputId, aspectRatio, cropViewMode){
+	openModal: function(inputId, aspectRatio, cropViewMode, multiple){
+		if (typeof multiple == 'undefined') {
+			multiple = false;
+		}
 		//get selected item
 		var iImageId = $("#"+inputId).val();
 		var srcImageIdQueryString = "";
@@ -39,7 +43,7 @@ var imageManagerInput = {
 		}
 		//create iframe url
 		var queryStringStartCharacter = ((imageManagerInput.baseUrl).indexOf('?') == -1) ? '?' : '&';
-		var imageManagerUrl = imageManagerInput.baseUrl+queryStringStartCharacter+"view-mode=iframe&input-id="+inputId+"&aspect-ratio="+aspectRatio+"&crop-view-mode="+cropViewMode+srcImageIdQueryString;
+		var imageManagerUrl = imageManagerInput.baseUrl+queryStringStartCharacter+"view-mode=iframe&input-id="+inputId+"&aspect-ratio="+aspectRatio+"&crop-view-mode="+cropViewMode+srcImageIdQueryString+"&multiple=" + this.multiple;
 		//set iframe path
 		$("#modal-imagemanager iframe").attr("src",imageManagerUrl);
                 //set translation title for modal header
@@ -50,6 +54,19 @@ var imageManagerInput = {
 	//close media manager modal
 	closeModal: function(){
 		$("#modal-imagemanager").modal("hide");
+	},
+	deleteImageById: function (id) {
+		var idArr = [];
+		$('.image-manager-input .img-preview').each(function (i,e) {
+			var $holder = $(e).parent();
+			if (id == $holder.data('id')) {
+				$holder.remove();
+			} else {
+				idArr.push($holder.data('id'));
+			}
+		});
+
+		$('.image-manager-input input[type="hidden"]').val(idArr.join(',')).trigger('change');
 	},
 	//delete picked image
 	deletePickedImage: function(inputId){
@@ -87,8 +104,22 @@ $(document).ready(function () {
 		var inputId = $(this).data("input-id");
 		//open selector id
 		imageManagerInput.openModal(inputId, aspectRatio, cropViewMode);
-	});	
-	
+	});
+	//open media manager modal
+	$(document).on("click", ".open-modal-imagemanager-multiple", function () {
+		var aspectRatio = $(this).data("aspect-ratio");
+		var cropViewMode = $(this).data("crop-view-mode");
+		var inputId = $(this).data("input-id");
+		//open selector id
+		imageManagerInput.openModal(inputId, aspectRatio, cropViewMode, true);
+	});
+
+	$(document).on("click", ".image-manager-input .delete-image-btn", function (){
+		var id = $(this).parent().data('id');
+		imageManagerInput.deleteImageById(id);
+		return false;
+	});
+
 	//delete picked image
 	$(document).on("click", ".delete-selected-image", function () {
 		var inputId = $(this).data("input-id");

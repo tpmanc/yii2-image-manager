@@ -9,6 +9,7 @@ var imageManagerModule = {
 	selectedImage: null,
 	//language
 	message: null,
+	multiple: false,
 	//init imageManager
 	init: function(){
 		//init cropper
@@ -53,14 +54,27 @@ var imageManagerModule = {
 				var sFieldId = imageManagerModule.fieldId;
 				var sFieldNameId = sFieldId+"_name";
 				var sFieldImageId = sFieldId+"_image";
-				//set input data		
-				$('#'+sFieldId, window.parent.document).val(imageManagerModule.selectedImage.id);
-				$('#'+sFieldNameId, window.parent.document).val(imageManagerModule.selectedImage.fileName);
-				$('#'+sFieldImageId, window.parent.document).attr("src",imageManagerModule.selectedImage.image).parent().removeClass("hide");
+				//set input data
+				if (this.multiple) {
+					var ids = $('#' + sFieldId, window.parent.document).val().split(',').filter(item => item != '');
+					ids.push(imageManagerModule.selectedImage.id);
+					$('#' + sFieldId, window.parent.document).val(ids.join(','));
+					$('#imageManagerImgHolder', window.parent.document)
+						.append('<div class="image-manager__multiple-item" data-id="'+imageManagerModule.selectedImage.id+'">' +
+								'<button type="button" class="delete-image-btn">X</button>' +
+								'<img alt="Thumbnail" class="img-responsive img-preview" src="'+imageManagerModule.selectedImage.image+'">' +
+							'</div>')
+						.removeClass("hide");
+				} else {
+					$('#' + sFieldId, window.parent.document).val(imageManagerModule.selectedImage.id);
+					$('#'+sFieldNameId, window.parent.document).val(imageManagerModule.selectedImage.fileName);
+					$('#'+sFieldImageId, window.parent.document).attr("src",imageManagerModule.selectedImage.image).parent().removeClass("hide");
+					//show delete button
+					$(".delete-selected-image[data-input-id='"+sFieldId+"']", window.parent.document).removeClass("hide");
+				}
 				//trigger change
 				parent.$('#'+sFieldId).trigger('change');
-				//show delete button
-				$(".delete-selected-image[data-input-id='"+sFieldId+"']", window.parent.document).removeClass("hide");
+
 				//close the modal
 				window.parent.imageManagerInput.closeModal();
 				break;

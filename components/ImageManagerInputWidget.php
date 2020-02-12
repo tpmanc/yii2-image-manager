@@ -33,6 +33,11 @@ class ImageManagerInputWidget extends InputWidget {
     public $showDeletePickedImageConfirm = false;
 
     /**
+     * @var bool
+     */
+    public $multiple = false;
+
+    /**
      * @inheritdoc
      */
     public function init() {
@@ -82,8 +87,17 @@ class ImageManagerInputWidget extends InputWidget {
         //end input group
         $sHideClass = $ImageManager_id === null ? 'hide' : '';
         $field .= "<a href='#' class='input-group-addon btn btn-primary delete-selected-image " . $sHideClass . "' data-input-id='" . $sFieldId . "' data-show-delete-confirm='" . ($this->showDeletePickedImageConfirm ? "true" : "false") . "'><i class='glyphicon glyphicon-remove' aria-hidden='true'></i></a>";
-        $field .= "<a href='#' class='input-group-addon btn btn-primary open-modal-imagemanager' data-aspect-ratio='" . $this->aspectRatio . "' data-crop-view-mode='" . $this->cropViewMode . "' data-input-id='" . $sFieldId . "'>";
-        $field .= "<i class='glyphicon glyphicon-folder-open' aria-hidden='true'></i>";
+        if ($this->multiple) {
+            $field .= "<a href='#' class='input-group-addon btn btn-primary open-modal-imagemanager-multiple' data-aspect-ratio='"
+                . $this->aspectRatio . "' data-crop-view-mode='" . $this->cropViewMode . "' data-input-id='" . $sFieldId
+                . "'>";
+            $field .= "<i class='glyphicon glyphicon-plus' aria-hidden='true'></i>";
+        } else {
+            $field .= "<a href='#' class='input-group-addon btn btn-primary open-modal-imagemanager' data-aspect-ratio='"
+                . $this->aspectRatio . "' data-crop-view-mode='" . $this->cropViewMode . "' data-input-id='" . $sFieldId
+                . "'>";
+            $field .= "<i class='glyphicon glyphicon-folder-open' aria-hidden='true'></i>";
+        }
         $field .= "</a></div>";
 
         //show preview if is true
@@ -91,9 +105,14 @@ class ImageManagerInputWidget extends InputWidget {
             $sHideClass = ($mImageManager == null) ? "hide" : "";
             $sImageSource = isset($mImageManager->id) ? \Yii::$app->imagemanager->getImagePath($mImageManager->id, 500, 500, 'inset') : "";
 
-            $field .= '<div class="image-wrapper ' . $sHideClass . '">'
-                    . '<img id="' . $sFieldId . '_image" alt="Thumbnail" class="img-responsive img-preview" src="' . $sImageSource . '">'
-                    . '</div>';
+
+            if ($this->multiple) {
+                $field .= '<div class="image-wrapper image-wrapper__multiple ' . $sHideClass . '" id="imageManagerImgHolder">';
+            } else {
+                $field .= '<div class="image-wrapper ' . $sHideClass . '" id="imageManagerImgHolder">';
+                $field .= '<img id="' . $sFieldId . '_image" alt="Thumbnail" class="img-responsive img-preview" src="' . $sImageSource . '">';
+            }
+            $field .= '</div>';
         }
 
         //close image-manager-input div
@@ -114,6 +133,7 @@ class ImageManagerInputWidget extends InputWidget {
         //set baseUrl from image manager
         $sBaseUrl = Url::to(['/imagemanager/manager']);
         //set base url
+        $view->registerJs("imageManagerInput.multiple = " . (($this->multiple) ? 'true' : 'false') . ";");
         $view->registerJs("imageManagerInput.baseUrl = '" . $sBaseUrl . "';");
         $view->registerJs("imageManagerInput.message = " . Json::encode([
                     'imageManager' => Yii::t('imagemanager','Image manager'),
