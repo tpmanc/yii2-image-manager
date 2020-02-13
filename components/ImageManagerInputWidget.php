@@ -71,11 +71,16 @@ class ImageManagerInputWidget extends InputWidget {
             //get attribute name
             $sFieldAttributeName = Html::getAttributeName($this->attribute);
             //get filename from selected file
-            $ImageManager_id = $this->model->{$sFieldAttributeName};
+            $imagesIdArr = [];
             $ImageManager_fileName = null;
-            $mImageManager = ImageManager::findOne($ImageManager_id);
-            if ($mImageManager !== null) {
+            if ($mImageManager !== null && !$this->multiple) {
+                $ImageManager_id = $this->model->{$sFieldAttributeName};
+                $mImageManager = ImageManager::findOne($ImageManager_id);
                 $ImageManager_fileName = $mImageManager->fileName;
+            } else {
+                $modelValue = $this->model->{$sFieldAttributeName};
+                $imagesIdArr = explode(',', $modelValue);
+                $ImageManager_id = $this->model->{$sFieldAttributeName};
             }
             //create field
             $field .= Html::textInput($this->attribute, $ImageManager_fileName, ['class' => 'form-control', 'id' => $sFieldNameId, 'readonly' => true]);
@@ -85,8 +90,13 @@ class ImageManagerInputWidget extends InputWidget {
             $field .= Html::hiddenInput($this->name, $this->value, $this->options);
         }
         //end input group
-        $sHideClass = $ImageManager_id === null ? 'hide' : '';
-        $field .= "<a href='#' class='input-group-addon btn btn-primary delete-selected-image " . $sHideClass . "' data-input-id='" . $sFieldId . "' data-show-delete-confirm='" . ($this->showDeletePickedImageConfirm ? "true" : "false") . "'><i class='glyphicon glyphicon-remove' aria-hidden='true'></i></a>";
+        if (!$this->multiple) {
+            $sHideClass = $ImageManager_id === null ? 'hide' : '';
+            $field      .= "<a href='#' class='input-group-addon btn btn-primary delete-selected-image " . $sHideClass
+                . "' data-input-id='" . $sFieldId . "' data-show-delete-confirm='"
+                . ($this->showDeletePickedImageConfirm ? "true" : "false")
+                . "'><i class='glyphicon glyphicon-remove' aria-hidden='true'></i></a>";
+        }
         if ($this->multiple) {
             $field .= "<a href='#' class='input-group-addon btn btn-primary open-modal-imagemanager-multiple' data-aspect-ratio='"
                 . $this->aspectRatio . "' data-crop-view-mode='" . $this->cropViewMode . "' data-input-id='" . $sFieldId
@@ -102,17 +112,41 @@ class ImageManagerInputWidget extends InputWidget {
 
         //show preview if is true
         if ($this->showPreview == true) {
-            $sHideClass = ($mImageManager == null) ? "hide" : "";
-            $sImageSource = isset($mImageManager->id) ? \Yii::$app->imagemanager->getImagePath($mImageManager->id, 500, 500, 'inset') : "";
-
-
             if ($this->multiple) {
-                $field .= '<div class="image-wrapper image-wrapper__multiple ' . $sHideClass . '" id="imageManagerImgHolder">';
+                $sImageSources = (!empty($imagesIdArr)) ? \Yii::$app->imagemanager->getImageArrPath(
+                    $imagesIdArr,
+                    500,
+                    500,
+                    'inset'
+                ) : [];
+
+                $field .= '<div class="image-wrapper image-wrapper__multiple" id="imageManagerImgHolder">';
+                foreach ($sImageSources as $imageSource) {
+                    $field .= '<div class="image-manager__multiple-item" data-id="' . $imageSource['id'] . '">
+                            <button type="button" class="delete-image-btn">X</button>
+                            <img alt="Thumbnail" class="img-responsive img-preview" src="' . $imageSource['url'] . '">
+                        </div>';
+                }
+                $field .= '</div>';
             } else {
-                $field .= '<div class="image-wrapper ' . $sHideClass . '" id="imageManagerImgHolder">';
-                $field .= '<img id="' . $sFieldId . '_image" alt="Thumbnail" class="img-responsive img-preview" src="' . $sImageSource . '">';
+                $sHideClass = ($mImageManager == null) ? "hide" : "";
+                $sImageSource = isset($mImageManager->id) ? \Yii::$app->imagemanager->getImagePath(
+                    $mImageManager->id,
+                    500,
+                    500,
+                    'inset'
+                ) : "";
+
+                if ($this->multiple) {
+                    $field .= '<div class="image-wrapper image-wrapper__multiple ' . $sHideClass
+                        . '" id="imageManagerImgHolder">';
+                } else {
+                    $field .= '<div class="image-wrapper ' . $sHideClass . '" id="imageManagerImgHolder">';
+                    $field .= '<img id="' . $sFieldId
+                        . '_image" alt="Thumbnail" class="img-responsive img-preview" src="' . $sImageSource . '">';
+                }
+                $field .= '</div>';
             }
-            $field .= '</div>';
         }
 
         //close image-manager-input div

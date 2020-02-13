@@ -10,8 +10,15 @@
     flex-wrap: wrap;
     background: transparent;
 }
+.image-manager-input .image-wrapper.image-wrapper__multiple:empty {
+    display: none;
+}
+.image-manager-input .image-wrapper.image-wrapper__multiple:not(:empty) {
+    display: flex;
+}
 .image-manager-input .image-wrapper.image-wrapper__multiple .image-manager__multiple-item {
     margin-right: 10px;
+    margin-bottom: 10px;
     position: relative;
 }
 .image-manager-input .image-wrapper.image-wrapper__multiple .image-manager__multiple-item button {

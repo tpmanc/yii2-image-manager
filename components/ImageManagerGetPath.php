@@ -100,6 +100,34 @@ class ImageManagerGetPath extends Component {
 		return $return;
 	}
 
+    public function getImageArrPath(array $idArray, $width = 400, $height = 400, $thumbnailMode = "outbound") {
+        $return = [];
+        $mImageManagers = ImageManager::find()->where(['id' => $idArray])->all();
+
+        foreach ($mImageManagers as $mImageManager) {
+
+            $sMediaPath = null;
+            if ($this->mediaPath !== null) {
+                $sMediaPath = $this->mediaPath;
+            }
+
+            $sFileExtension = pathinfo($mImageManager->fileName, PATHINFO_EXTENSION);
+            //get image file path
+            $sImageFilePath = $sMediaPath . '/' . $mImageManager->id . '_' . $mImageManager->fileHash . '.' . $sFileExtension;
+            //check file exists
+            if (file_exists($sImageFilePath)) {
+                $return[] = [
+                    'id' => $mImageManager->id,
+                    'url' => \Yii::$app->imageresize->getUrl($sImageFilePath, $width, $height, $thumbnailMode, null, $mImageManager->fileName),
+                ];
+            } else {
+                $return[] = null; //isset(\Yii::$app->controller->module->assetPublishedUrl) ? \Yii::$app->controller->module->assetPublishedUrl. "/img/img_no-image.png" : null;
+            }
+        }
+        
+        return $return;
+    }
+
     /**
      * Check if the user configurable variables match the criteria
      * @throws InvalidConfigException
