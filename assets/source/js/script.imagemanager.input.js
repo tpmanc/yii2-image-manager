@@ -112,6 +112,7 @@ $(document).ready(function () {
 		var inputId = $(this).data("input-id");
 		//open selector id
 		imageManagerInput.openModal(inputId, aspectRatio, cropViewMode, true);
+		return false;
 	});
 
 	$(document).on("click", ".image-manager-input .delete-image-btn", function (){
